@@ -8,10 +8,15 @@
     'author': "Marco Silva, Johan Camp",
     'depends': ['base', 'account', 'account_accountant'],
     'data': [
-        # 'security/ir.model.access.csv',
-        'views/views.xml',
-        # 'views/templates.xml',
+        'security/ir.model.access.csv',
+        'views/account_journal_views.xml',
     ],
+    "assets": {
+        "web.assets_backend": [
+            "account_journal_credit_card/static/src/js/credit_card_toggle.js"
+            "account_journal_credit_card/static/src/js/credit_card_kanban.js"
+        ]
+    },
     'installable': True,
     'application': False,
 }
