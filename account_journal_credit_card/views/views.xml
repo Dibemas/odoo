@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Add Approver Fields on Journal View -->
+        <!-- <record id="account_journal_form_approver" model="ir.ui.view">
+            <field name="name">account.journal.form</field>
+            <field name="model">account.journal</field>
+            <field name="inherit_id" ref="account.view_account_journal_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='account_control_ids']" position="after">
+                    <field name="master_approver" widget="many2many_avatar_user" invisible="type not in 'purchase'"/>
+                </xpath>
+            </field>
+        </record> -->
+
+
+
+    </data>
+</odoo>

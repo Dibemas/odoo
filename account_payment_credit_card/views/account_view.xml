@@ -8,8 +8,8 @@
         <field name="inherit_id" ref="account.view_account_journal_form" />
         <field name="arch" type="xml">
             <field name="default_account_id" position="after">
-                <field name="credit_card" invisible="type != 'bank'"/>
-                <field name="partner_id" invisible="type != 'bank' or not credit_card"/>
+                <field name="credit_card" invisible="type not in ('bank', 'cash')" widget='boolean_toggle'/>
+                <field name="partner_id" invisible="type not in ('bank', 'cash') or not credit_card"/>
             </field>
         </field>
     </record>
