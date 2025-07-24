@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="account_move_tree_journal_deleter" model="ir.ui.view">
+            <field name="name">account.move.tree</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree" position="inside">
+                    <header>
+                        <button name="action_master_delete_entries" type="object" string="Force Delete"
+                                class="oe_highlight"/>
+                    </header>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>
