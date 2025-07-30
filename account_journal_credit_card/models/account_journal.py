@@ -40,7 +40,6 @@ class AccountJournal(models.Model):
                     'default_code': 'CCARD',
                     'default_company_id': company_id,
                     'default_is_credit_card': True,
-                    # 'default_bank_statements_source': 'file',
                     'default_show_on_dashboard': True,
                     'default_update_posted': True,
             },

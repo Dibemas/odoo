@@ -1,0 +1,20 @@
+<odoo>
+    <data>
+
+        <!-- Add Fields on Move Line View -->
+        <record id="account_move_line_form" model="ir.ui.view">
+            <field name="name">account.move.form</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//notebook/page[@id='aml_tab']/field/tree/field[@name='name']" position="after">
+                    <field name="linked_bill_id" options="{'no_create': True}" readonly="1"/>
+                    <field name="linked_payment_id" optional="show" column_invisible="False"/>
+                </xpath>
+                <!-- <field name="partner_id" optional="show" domain="['|', ('parent_id', '=', False), ('is_company', '=', True)]" column_invisible="parent.move_type != 'entry'"/> -->
+            </field>
+        </record>
+
+    </data>
+</odoo>

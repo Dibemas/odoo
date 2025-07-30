@@ -10,6 +10,8 @@
     'data': [
         'security/ir.model.access.csv',
         'views/account_journal_views.xml',
+        'views/account_move_line_views.xml',
+        'views/account_move_views.xml',
         'wizard/account_journal_credit_card_wizard.xml',
     ],
     "assets": {

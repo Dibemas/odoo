@@ -3,6 +3,7 @@ import csv
 import base64
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
+from datetime import datetime
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -34,6 +35,8 @@ class AccountJournalCreditCardImportWizard(models.TransientModel):
         domain=[('type', '=', 'cash')]
     )
 
+    move_id = fields.Many2one('account.move', string="Journal Entry")
+
     @api.model
     def default_get(self, fields_list):
         res = super().default_get(fields_list)
@@ -61,25 +64,16 @@ class AccountJournalCreditCardImportWizard(models.TransientModel):
             raise UserError(_("Failed to read CSV file: %s") % str(e))
 
         # Map multilingual headers to normalized field names
-        header_map = {
-            'Datum': 'date',
-            'Date': 'date',
-            'Omschrijving': 'description',
-            'Description': 'description',
-            'Bedrag': 'amount',
-            'Amount': 'amount',
-            'Bedrag (EUR)': 'amount_eur',
-            'Munt': 'currency',
-            'Currency': 'currency',
-            'Koers': 'rate',
-            'Rate': 'rate',
-        }
+        header_map = self._build_translation_header_map([
+            'periode', 'date', 'description', 'amount', 'amount_eur', 'currency', 'rate'
+        ])
 
+        account = None
         move_lines_vals = []
 
         _logger.info("========== Parsed CSV Lines ==========")
 
-        rows = list(reader)  # convert to list to index last row
+        rows = list(reader)
 
         for i, row in enumerate(rows):
             if not any(row.values()):
@@ -95,10 +89,7 @@ class AccountJournalCreditCardImportWizard(models.TransientModel):
 
             # Parse amount as float
             amount = self._parse_number(amount_str, decimal_sep, thousand_sep)
-
-            if i == len(rows) - 1 and amount > 0:
-                _logger.info("Skipping last row with positive amount: %s", row)
-                continue
+            periode = normalized.get('periode')
 
             try:
                 description = normalized.get('description', '')
@@ -110,32 +101,50 @@ class AccountJournalCreditCardImportWizard(models.TransientModel):
                 amount_eur = normalized.get('amount_eur')
                 raw_amount = normalized.get('amount')
 
-                if amount_eur:
+                if amount_eur and raw_amount:
+                    # Parse amount in company currency (EUR)
                     amount = self._parse_number(
                         amount_eur, decimal_sep, thousand_sep)
-                elif raw_amount:
-                    amount_val = self._parse_number(
-                        raw_amount, decimal_sep, thousand_sep)
-                    amount = round(amount_val / rate, 2)
+
+                    # Parse amount in transaction currency
+                    amount_currency = round(
+                        self._parse_number(
+                            raw_amount, decimal_sep, thousand_sep), 2 if rate == 1 else 4
+                    )
                 else:
                     raise UserError(
-                        _("No valid amount found in row: %s") % row)
+                        _("Missing amount or raw_amount in row: %s") % row)
 
-                debit = amount if amount > 0 else 0.0
-                credit = -amount if amount < 0 else 0.0
+                debit = -amount if amount > 0 else 0.0
+                credit = amount if amount < 0 else 0.0
 
-                default_account = self.journal_id.default_account_id
-                if not default_account:
+                payment_move, linked_bills, partner = self.env['account.move.line']._find_matching_payment(
+                    date, amount)
+
+                # Use payment's account if found, otherwise fallback to journal's default
+                if payment_move and payment_move.line_ids:
+                    payment_account = payment_move.line_ids[0].account_id
+                else:
+                    payment_account = self.journal_id.default_account_id
+
+                account = payment_account if payment_account else None
+
+                if not payment_account:
                     raise UserError(
-                        _("The selected journal has no 'Cash Account' configured."))
+                        _("No account found from payment or journal."))
 
                 line_val = {
                     'name': description,
+                    'partner_id': partner.id if partner else False,
                     'date': date,
-                    'account_id': default_account.id,
+                    'date_maturity': date,
+                    'account_id': account.id,
+                    'amount_currency': -amount_currency,
                     'debit': debit,
                     'credit': credit,
                     'currency_id': self.env['res.currency'].search([('name', '=', currency)], limit=1).id,
+                    'linked_payment_id': payment_move.id if payment_move else False,
+                    'linked_bill_id': linked_bills[0].id if linked_bills else False,
                 }
 
                 move_lines_vals.append((0, 0, line_val))
@@ -148,13 +157,23 @@ class AccountJournalCreditCardImportWizard(models.TransientModel):
 
         # Create the journal entry
         journal = self.journal_id
+        ref = periode or "Imported from Credit Card"
+
         if not journal:
             raise UserError(_("No general journal found."))
 
-        move = self.env['account.move'].create({
+        if not move_lines_vals:
+            raise UserError(_("No valid lines to import from the CSV."))
+
+        # Ensure entry is balanced
+        move_lines_vals = self._add_balancing_line_if_needed(
+            move_lines_vals, journal, ref, account)
+
+        move = self.env['account.move'].sudo().create({
             'move_type': 'entry',
             'journal_id': journal.id,
             'line_ids': move_lines_vals,
+            'ref': ref,
         })
 
         return {
@@ -171,6 +190,63 @@ class AccountJournalCreditCardImportWizard(models.TransientModel):
             if alias in row and row[alias]:
                 return row[alias]
         return None
+
+    def _build_translation_header_map(self, field_names):
+        header_map = {}
+
+        # Defensive: ensure model is loaded
+        if 'ir.translation' not in self.env.registry.models:
+            _logger.warning(
+                "Translation model not found. Using fallback header mapping.")
+            return self._static_header_map()
+
+        IrTranslation = self.env['ir.translation']
+        IrLang = self.env['res.lang']
+
+        # Get all active languages from system
+        all_languages = IrLang.search([('active', '=', True)]).mapped('code')
+
+        for field in field_names:
+            label = field.replace('_', ' ').capitalize()
+
+            # Add default English-style label
+            header_map[label] = field
+
+            # Add all translations for this label across all active languages
+            translations = IrTranslation.search([
+                ('name', 'like', 'account.journal.credit.card.import.wizard,%'),
+                ('type', '=', 'model'),
+                ('src', '=', label),
+                ('lang', 'in', all_languages),
+                ('value', '!=', ''),
+            ])
+
+            for trans in translations:
+                translated = trans.value.strip()
+                if translated:
+                    header_map[translated] = field
+
+        # Manual case
+        header_map['Bedrag (EUR)'] = 'amount_eur'
+
+        return header_map
+
+    def _static_header_map(self):
+        return {
+            'Periode': 'periode',
+            'Period': 'periode',
+            'Datum': 'date',
+            'Date': 'date',
+            'Omschrijving': 'description',
+            'Description': 'description',
+            'Bedrag': 'amount',
+            'Amount': 'amount',
+            'Bedrag (EUR)': 'amount_eur',
+            'Munt': 'currency',
+            'Currency': 'currency',
+            'Koers': 'rate',
+            'Rate': 'rate',
+        }
 
     def _parse_number(self, value, decimal_sep, thousand_sep):
         """Convert string to float respecting thousands and decimal separators."""
@@ -189,7 +265,6 @@ class AccountJournalCreditCardImportWizard(models.TransientModel):
 
     def _parse_date(self, date_str):
         """Parses date from CSV and returns it in YYYY-MM-DD format."""
-        from datetime import datetime
         try:
             # Try European format: DD/MM/YYYY
             return datetime.strptime(date_str.strip(), '%d/%m/%Y').date().isoformat()
@@ -197,23 +272,29 @@ class AccountJournalCreditCardImportWizard(models.TransientModel):
             # If already ISO format or empty, pass it through (or handle as needed)
             return date_str
 
+    def _add_balancing_line_if_needed(self, move_lines_vals, journal, ref, account):
+        """Ensure journal entry is balanced by adding a balancing line if required."""
+        total_debit = sum(line[2]['debit'] for line in move_lines_vals)
+        total_credit = sum(line[2]['credit'] for line in move_lines_vals)
+        diff = round(total_debit - total_credit, 2)
 
-# class AccountJournalCreditCardImportLine(models.TransientModel):
-#     _name = 'account.journal.credit.card.import.line'
-#     _description = 'Credit Card CSV Import Line'
+        if diff == 0.0:
+            return move_lines_vals
 
-#     wizard_id = fields.Many2one('account.journal.credit.card.import.wizard')
-#     amount = fields.Float()
-#     description = fields.Char()
-#     match_booking_id = fields.Many2one(
-#         'account.move.line')
-#     partner_id = fields.Many2one(
-#         related='match_booking_id.partner_id', readonly=True)
-#     invoice_id = fields.Many2one(
-#         related='match_booking_id.move_id', readonly=True)
+        debit = diff if diff < 0 else 0.0
+        credit = diff if diff > 0 else 0.0
 
-#     @api.depends('match_booking_id')
-#     def _compute_related_fields(self):
-#         for line in self:
-#             line.partner_id = line.match_booking_id.partner_id
-#             line.invoice_id = line.match_booking_id.move_id
+        balancing_line = {
+            'name': f"{journal.name} - {ref} balancing line",
+            'account_id': account.id,
+            'debit': debit,
+            'credit': credit,
+            'date': fields.Date.today(),
+            'date_maturity': fields.Date.today(),
+            'currency_id': self.env.company.currency_id.id,
+            'amount_currency': -debit if debit else -credit,
+        }
+
+        _logger.info("Added balancing line: %s", balancing_line)
+        move_lines_vals.append((0, 0, balancing_line))
+        return move_lines_vals
