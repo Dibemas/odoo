@@ -94,3 +94,19 @@ class AccountMoveLine(models.Model):
 
         partner = bills[0].partner_id if bills else payment.partner_id
         return bills, partner
+
+    def _auto_reconcile_credit_card_journal_entries(self):
+        self.ensure_one()
+
+        if not self.linked_payment_id:
+            return
+
+        move_line = self
+        payment_move = self.linked_payment_id
+
+        payment_line = payment_move.line_ids.filtered(
+            lambda l: l.account_id == move_line.account_id and not l.reconciled
+        )
+
+        if payment_line and not move_line.reconciled:
+            (move_line + payment_line[0]).reconcile()
