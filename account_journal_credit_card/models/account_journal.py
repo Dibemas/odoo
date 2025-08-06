@@ -23,7 +23,7 @@ class AccountJournal(models.Model):
         }
 
     @api.model
-    def action_add_credit_card(self):
+    def action_add_credit_card_jornal(self):
         """Open the credit card journal form with prefilled values."""
         company_id = self.env.company.id
 
