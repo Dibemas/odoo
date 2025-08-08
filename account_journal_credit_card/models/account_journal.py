@@ -53,6 +53,7 @@ class AccountJournal(models.Model):
             'view_mode': 'form',
             'target': 'new',
             'context': {
+                'default_journal_id': self.id,
                 'default_filename': '',
             }
         }

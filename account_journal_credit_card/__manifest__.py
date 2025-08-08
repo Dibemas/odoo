@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Credit Card - Module',
-    'version': '17.0',
+    'version': '18.0.0.0',
     'category': 'Tools',
     'description': "Simplify the administration and Follow up of credit card payments",
     'license': 'LGPL-3',

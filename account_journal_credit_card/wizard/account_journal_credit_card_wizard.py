@@ -40,8 +40,9 @@ class AccountJournalCreditCardImportWizard(models.TransientModel):
     @api.model
     def default_get(self, fields_list):
         res = super().default_get(fields_list)
-        if self.env.context.get('default_journal_id'):
-            res['journal_id'] = self.env.context['default_journal_id']
+        journal_id = self.env.context.get('default_journal_id')
+        if journal_id:
+            res['journal_id'] = journal_id
         return res
 
     def action_import_csv(self):

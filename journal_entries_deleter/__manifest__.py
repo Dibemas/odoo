@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Journal Entries Deleter',
-    'version': '17.0',
+    'version': '18.0.0.0',
     'category': 'Sales',
     'description': "Journal Entries Deleter - Module",
     'license': 'LGPL-3',
