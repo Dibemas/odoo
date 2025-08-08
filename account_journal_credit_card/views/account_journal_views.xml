@@ -43,7 +43,7 @@
             <field name="code">action = model.action_add_credit_card_jornal()</field>
         </record>
 
-        <menuitem name="Add Credit Card" id="menu_action_online_add_credit_card_form" parent="account.account_banks_menu" action="account_journal_action_add_credit_card" groups="base.group_no_one" sequence="1"/>
+        <menuitem name="Add Credit Card" id="menu_action_online_add_credit_card_form" parent="account.account_banks_menu" action="account_journal_action_add_credit_card_jornal" groups="base.group_no_one" sequence="1"/>
 
     </data>
 </odoo>
