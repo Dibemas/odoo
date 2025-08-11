@@ -84,13 +84,21 @@ class AccountMoveLine(models.Model):
         if not payment:
             return None, None
 
-        bill_lines = payment.line_ids.mapped('matched_debit_ids.debit_move_id.move_id') + \
+        payable_lines = payment.line_ids.mapped('matched_debit_ids.debit_move_id.move_id') + \
             payment.line_ids.mapped(
                 'matched_credit_ids.credit_move_id.move_id')
 
-        bills = bill_lines.filtered(
+        bills = payable_lines.filtered(
             lambda m: m.move_type == 'in_invoice' and m.payment_state != 'paid'
         )
+
+        # If nothing found, try fetching via reconciled_bill_ids
+        if not bills:
+            payment_rec = self.env['account.payment'].search(
+                [('move_id', 'in', payable_lines.move_id.ids)],
+                limit=1
+            )
+            bills = payment_rec.reconciled_bill_ids
 
         partner = bills[0].partner_id if bills else payment.partner_id
         return bills, partner

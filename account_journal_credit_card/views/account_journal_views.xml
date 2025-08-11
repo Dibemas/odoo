@@ -10,8 +10,8 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='type']" position="after">
                     <field name="is_credit_card" widget='boolean_toggle'/>
+                    <field name="credit_card_payment_term_id" widget='many2many_tags' invisible='not is_credit_card or not credit_card_payment_term_id' readonly='1'/>
                 </xpath>
-
             </field>
         </record>
 
@@ -21,7 +21,6 @@
             <field name="model">account.journal</field>
             <field name="inherit_id" ref="account.account_journal_dashboard_kanban_view"/>
             <field name="arch" type="xml">
-
                 <xpath expr="//div[@id='dashboard_bank_cash_left']" position="inside">
                     <field name="is_credit_card" invisible="1"/>
                     <br/>
@@ -30,13 +29,7 @@
                             Upload
                         </button>
                     </t>
-                    <!-- <t t-if="record.is_credit_card.raw_value == true">
-                        <a type="object" name="action_open_credit_card_import_wizard" context="{'default_journal_id': record.id}">
-                            Upload
-                        </a>
-                    </t> -->
                 </xpath>
-
             </field>
         </record>
 

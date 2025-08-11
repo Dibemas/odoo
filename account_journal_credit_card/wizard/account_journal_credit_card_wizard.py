@@ -134,6 +134,10 @@ class AccountJournalCreditCardImportWizard(models.TransientModel):
                     raise UserError(
                         _("No account found from payment or journal."))
 
+                currency_code = normalized.get('currency') or 'EUR'
+                # This will ensure a currency is given in case the field is empty
+                currency_id = self._check_currency_available(currency_code)
+
                 line_val = {
                     'name': description,
                     'partner_id': partner.id if partner else False,
@@ -143,7 +147,7 @@ class AccountJournalCreditCardImportWizard(models.TransientModel):
                     'amount_currency': -amount_currency,
                     'debit': debit,
                     'credit': credit,
-                    'currency_id': self.env['res.currency'].search([('name', '=', currency)], limit=1).id,
+                    'currency_id': currency_id,
                     'linked_payment_id': payment_move.id if payment_move else False,
                     'linked_bill_id': linked_bills[0].id if linked_bills else False,
                 }
@@ -299,3 +303,25 @@ class AccountJournalCreditCardImportWizard(models.TransientModel):
         _logger.info("Added balancing line: %s", balancing_line)
         move_lines_vals.append((0, 0, balancing_line))
         return move_lines_vals
+
+    def _check_currency_available(self, currency_code):
+        """Ensure a currency exists and is active. 
+        If missing, raise an error; if inactive, activate it."""
+        if not currency_code:
+            raise UserError(_("No currency code provided."))
+
+        currency_code = currency_code.upper()
+        currency_obj = self.env['res.currency'].with_context(active_test=False).search(
+            [('name', '=', currency_code)], limit=1
+        )
+
+        if not currency_obj:
+            raise UserError(
+                _("Currency '%s' is not available in the system. Please create it before importing.")
+                % currency_code
+            )
+
+        if not currency_obj.active:
+            currency_obj.write({'active': True})
+
+        return currency_obj.id

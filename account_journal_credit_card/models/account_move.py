@@ -18,7 +18,7 @@ class AccountMove(models.Model):
                             f"Set a value on the due date for the line {line.name}")
                     else:
                         payment, bills, partner = line._find_matching_payment(
-                            line.date_maturity, line.amount_currency)
+                            line.date_maturity, line.debit)
                         if payment or bills or partner:
                             line_vals = {}
                             if payment:
@@ -64,7 +64,8 @@ class AccountMove(models.Model):
             'journal_id': journal.id,
             'payment_method_line_id': method_line.id,
             'date': self.invoice_date or fields.Date.context_today(self),
-            'ref': self.ref,
+            'memo': self.ref,
+            'invoice_ids': [(4, self.id)],
         }
 
         payment = self.env['account.payment'].create(payment_vals)

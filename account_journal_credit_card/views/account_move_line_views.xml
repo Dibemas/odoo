@@ -12,7 +12,6 @@
                     <field name="linked_bill_id" options="{'no_create': True}" readonly="1"/>
                     <field name="linked_payment_id" optional="show" column_invisible="False"/>
                 </xpath>
-                <!-- <field name="partner_id" optional="show" domain="['|', ('parent_id', '=', False), ('is_company', '=', True)]" column_invisible="parent.move_type != 'entry'"/> -->
             </field>
         </record>
 

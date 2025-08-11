@@ -9,6 +9,12 @@ class AccountJournal(models.Model):
     is_credit_card = fields.Boolean(
         string="Credit Card Journal", help="Indicates this journal is used for credit card payments.")
 
+    credit_card_payment_term_id = fields.One2many(
+        'account.payment.term',
+        'credit_card_journal_id',
+        string="Related Payment Terms"
+    )
+
     def open_statement_import_wizard(self):
         self.ensure_one()
         return {
@@ -61,12 +67,14 @@ class AccountJournal(models.Model):
     def open_action(self):
         self.ensure_one()
         if self.is_credit_card:
+            payment_moves = self.env['account.payment'].search(
+                [('journal_id', '=', self.id)]).mapped('move_id').ids
             return {
                 'name': 'Credit Card Transactions',
                 'type': 'ir.actions.act_window',
                 'res_model': 'account.move',
-                'view_mode': 'tree,form',
-                'domain': ['|', ('journal_id', '=', self.id), ('payment_id.journal_id', '=', self.id)],
+                'view_mode': 'list,form',
+                'domain': ['|', ('journal_id', '=', self.id), ('id', 'in', payment_moves)],
                 'context': {'default_journal_id': self.id},
             }
         return super().open_action()
