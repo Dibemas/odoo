@@ -9,7 +9,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//list" position="inside">
                     <header>
-                        <button name="action_master_delete_entries" type="object" string="Force Delete" class="oe_highlight"/>
+                        <button name="action_master_delete_entries" type="object" string="Force Delete" class="oe_highlight" groups="account.group_account_manager"/>
                     </header>
                 </xpath>
             </field>
