@@ -4,8 +4,6 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-# python3.10 odoo-bin -c odoo17.conf -d younify_11 -u journal_entries_deleter --dev=all
-
 class AccountMove(models.Model):
     _inherit = "account.move"
 
