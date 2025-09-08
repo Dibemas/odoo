@@ -1,12 +1,11 @@
-
 {
-    'name': 'Journal Entries Deleter',
+    'name': 'Outgoing Mail Server - BCC',
     'version': '1.0',
-    'category': 'Sales',
-    'description': "Journal Entries Deleter - Module",
+    'category': 'Email',
+    'description': "Outgoing Mail Server BCC - Module",
     'license': 'LGPL-3',
     'author': "Marco Silva, Johan Camp",
-    'depends': ['base', 'sale', 'product', 'account'],
+    'depends': ['base', 'sale', 'mail'],
     'data': [
         'views/views.xml',
     ],
