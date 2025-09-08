@@ -12,3 +12,4 @@
     'installable': True,
     'application': False,
 }
+# Test to push to odoo.sh
