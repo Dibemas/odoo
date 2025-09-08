@@ -1,15 +1,17 @@
-
 {
     'name': 'Credit Card - Module',
-    'version': '17.0',
-    'category': 'Tools',
+    'version': '1.0',
+    'category': 'Accounting',
     'description': "Simplify the administration and Follow up of credit card payments",
-    'license': 'LGPL-3',
+    'license': 'OPL-1',
     'author': "Marco Silva, Johan Camp",
     'depends': ['base', 'account', 'account_accountant'],
     'data': [
         'security/ir.model.access.csv',
         'views/account_journal_views.xml',
+        'views/account_move_line_views.xml',
+        'views/account_move_views.xml',
+        'views/account_payment_term_views.xml',
         'wizard/account_journal_credit_card_wizard.xml',
     ],
     "assets": {
