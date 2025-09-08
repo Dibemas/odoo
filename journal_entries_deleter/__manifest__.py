@@ -1,4 +1,3 @@
-
 {
     'name': 'Journal Entries Deleter',
     'version': '1.0',
