@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 {
     'name': 'Credit Card - Module',
     'version': '1.0',
-    'category': 'Tools',
+    'category': 'Accounting',
     'description': "Simplify the administration and Follow up of credit card payments",
-    'license': 'OPL-1.0',
+    'license': 'OPL-1',
     'author': "Marco Silva, Johan Camp",
     'depends': ['base', 'account', 'account_accountant'],
     'data': [
