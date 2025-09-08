@@ -4,7 +4,7 @@
     'version': '1.0',
     'category': 'Tools',
     'description': "Simplify the administration and Follow up of credit card payments",
-    'license': 'LGPL-3',
+    'license': 'OPL-1.0',
     'author': "Marco Silva, Johan Camp",
     'depends': ['base', 'account', 'account_accountant'],
     'data': [
