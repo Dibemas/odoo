@@ -25,8 +25,8 @@
                 <xpath expr="//field[@name='email_cc']" position="after">
                     <field name="is_bcc_copy" readonly="1" widget="boolean_toggle" invisible="not is_bcc_copy"/>
                     <field name="bcc_copy_of_id" readonly="1" invisible="not is_bcc_copy"/>
-                    <field name="is_bcc_copy_sent" readonly="1" widget="boolean_toggle" invisible="not is_bcc_copy"/>
-                    <field name="bcc_copy_ids" readonly="1" widget="many2many_tags" invisible="not is_bcc_copy"/>
+                    <field name="is_bcc_copy_sent" readonly="1" widget="boolean_toggle" invisible="not is_bcc_copy_sent"/>
+                    <field name="bcc_copy_ids" readonly="1" widget="many2many_tags" invisible="not is_bcc_copy_sent"/>
                 </xpath>
 
             </field>
