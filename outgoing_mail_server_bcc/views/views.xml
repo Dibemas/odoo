@@ -2,6 +2,7 @@
 <odoo>
     <data>
 
+        <!-- Add Fields on Server Outgoing Form -->
         <record id="ir_mail_server_form_view_bcc" model="ir.ui.view">
             <field name="name">ir.mail_server.bcc</field>
             <field name="model">ir.mail_server</field>
@@ -13,6 +14,38 @@
                 </xpath>
             </field>
         </record>
+
+        <!-- Extend Mail Form -->
+        <record id="view_mail_form_bcc_extension" model="ir.ui.view">
+            <field name="name">mail.mail.form.bcc.extension</field>
+            <field name="model">mail.mail</field>
+            <field name="inherit_id" ref="mail.view_mail_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='email_cc']" position="after">
+                    <field name="is_bcc_copy" readonly="1" widget="boolean_toggle" invisible="not is_bcc_copy"/>
+                    <field name="bcc_copy_of_id" readonly="1" invisible="not is_bcc_copy"/>
+                    <field name="is_bcc_copy_sent" readonly="1" widget="boolean_toggle" invisible="not is_bcc_copy"/>
+                    <field name="bcc_copy_ids" readonly="1" widget="many2many_tags" invisible="not is_bcc_copy"/>
+                </xpath>
+
+            </field>
+        </record>
+
+        <!-- Extend Mail Tree/List -->
+        <record id="view_mail_list_bcc_extension" model="ir.ui.view">
+            <field name="name">mail.mail.list.bcc.extension</field>
+            <field name="model">mail.mail</field>
+            <field name="inherit_id" ref="mail.view_mail_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//list/field[@name='subject']" position="after">
+                    <field name="is_bcc_copy" readonly="1" widget="boolean_toggle" optional='show'/>
+                    <field name="is_bcc_copy_sent" readonly="1" widget="boolean_toggle" optional='show'/>
+                    <field name="bcc_copy_of_id" readonly="1" optional='hide'/>
+                </xpath>
+            </field>
+        </record>
+
 
     </data>
 </odoo>

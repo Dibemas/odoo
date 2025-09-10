@@ -4,7 +4,32 @@ from odoo import api, fields, models, _
 class MailMail(models.Model):
     _inherit = 'mail.mail'
 
-    is_bcc_copy_sent = fields.Boolean(string='BCC Copy Sent', default=False)
+    is_bcc_copy_sent = fields.Boolean(
+        string='BCC Copy Sent',
+        default=False,
+        copy=False
+    )
+
+    is_bcc_copy = fields.Boolean(
+        string='Is BCC Copy',
+        default=False,
+        readonly=True,
+        copy=False
+    )
+
+    bcc_copy_of_id = fields.Many2one(
+        'mail.mail',
+        string='Original Mail',
+        readonly=True,
+        ondelete='cascade',
+    )
+
+    bcc_copy_ids = fields.One2many(
+        'mail.mail',
+        'bcc_copy_of_id',
+        string='BCC Copies',
+        readonly=True,
+    )
 
     def _send(self, auto_commit=False, raise_exception=False, smtp_session=None, alias_domain_id=None, mail_server=None, post_send_callback=None,):
         result = super()._send(
@@ -29,6 +54,8 @@ class MailMail(models.Model):
                     'email_cc': False,
                     'partner_ids': False,
                     'recipient_ids': False,
+                    'is_bcc_copy': True,
+                    'bcc_copy_of_id': mail.id,
                 })
                 super(MailMail, mail_copy)._send(
                     auto_commit=True,
