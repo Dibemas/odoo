@@ -6,11 +6,14 @@ class MailMail(models.Model):
 
     is_bcc_copy_sent = fields.Boolean(string='BCC Copy Sent', default=False)
 
-    def _send(self, auto_commit=False, raise_exception=False, smtp_session=None):
+    def _send(self, auto_commit=False, raise_exception=False, smtp_session=None, alias_domain_id=None, mail_server=None, post_send_callback=None,):
         result = super()._send(
             auto_commit=auto_commit,
             raise_exception=raise_exception,
             smtp_session=smtp_session,
+            alias_domain_id=alias_domain_id,
+            mail_server=mail_server,
+            post_send_callback=post_send_callback,
         )
 
         for mail in self:
@@ -30,6 +33,9 @@ class MailMail(models.Model):
                 super(MailMail, mail_copy)._send(
                     auto_commit=True,
                     smtp_session=smtp_session,
+                    alias_domain_id=alias_domain_id,
+                    mail_server=mail_server,
+                    post_send_callback=post_send_callback,
                 )
                 mail.is_bcc_copy_sent = True
 
