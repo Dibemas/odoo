@@ -45,27 +45,48 @@ class MailMail(models.Model):
         )
 
         for mail in self:
-            if not mail.is_bcc_copy_sent and mail.mail_server_id and mail.mail_server_id.bcc_active and mail.mail_server_id.bcc_email:
-                if mail.email_to != mail.mail_server_id.bcc_email:
+            if mail.is_bcc_copy_sent:
+                continue
+
+            # Determine which mail server will actually be used
+            actual_server = mail.mail_server_id or self.env['ir.mail_server'].sudo().search(
+                [('active', '=', True)],
+                order='sequence asc',
+                limit=1
+            )
+
+            if not actual_server:
+                _logger.warning(
+                    "No active outgoing server found for mail %s", mail.id)
+                continue
+
+            if actual_server.bcc_active and actual_server.bcc_email and mail.email_to != actual_server.bcc_email:
+                try:
                     mail_copy = mail.copy({
-                        'email_to': mail.mail_server_id.bcc_email,
+                        'email_to': actual_server.bcc_email,
                         'email_cc': False,
                         'partner_ids': [(6, 0, [])],
                         'recipient_ids': [(6, 0, [])],
                         'is_bcc_copy': True,
                         'bcc_copy_of_id': mail.id,
+                        'mail_server_id': actual_server.id,
                     })
-                    try:
-                        mail_copy._send(
-                            auto_commit=True,
-                            smtp_session=smtp_session,
-                            alias_domain_id=alias_domain_id,
-                            mail_server=mail_server,
-                            post_send_callback=post_send_callback,
-                        )
-                    except Exception as e:
-                        _logger.error(
-                            "BCC copy send failed for mail %s: %s", mail.id, e)
+
+                    mail_copy._send(
+                        auto_commit=True,
+                        smtp_session=smtp_session,
+                        alias_domain_id=alias_domain_id,
+                        mail_server=actual_server,
+                        post_send_callback=post_send_callback,
+                    )
+
+                    # Mark original as having sent a BCC
                     mail.is_bcc_copy_sent = True
+                    _logger.info(
+                        "BCC copy created for mail %s -> %s", mail.id, mail_copy.id)
+
+                except Exception as e:
+                    _logger.error(
+                        "Failed to send BCC copy for mail %s: %s", mail.id, e)
 
         return result
