@@ -6,8 +6,12 @@ class MailMail(models.Model):
 
     is_bcc_copy_sent = fields.Boolean(string='BCC Copy Sent', default=False)
 
-    def _send(self, auto_commit=False, raise_exception=False):
-        result = super()._send(auto_commit=auto_commit, raise_exception=raise_exception)
+    def _send(self, auto_commit=False, raise_exception=False, smtp_session=None):
+        result = super()._send(
+            auto_commit=auto_commit,
+            raise_exception=raise_exception,
+            smtp_session=smtp_session,
+        )
 
         for mail in self:
             if (
@@ -23,7 +27,10 @@ class MailMail(models.Model):
                     'partner_ids': False,
                     'recipient_ids': False,
                 })
-                super(MailMail, mail_copy)._send(auto_commit=True)
+                super(MailMail, mail_copy)._send(
+                    auto_commit=True,
+                    smtp_session=smtp_session,
+                )
                 mail.is_bcc_copy_sent = True
 
         return result
