@@ -118,15 +118,13 @@ class AccountJournalCreditCardImportWizard(models.TransientModel):
 
                 debit = -amount if amount > 0 else 0.0
                 credit = amount if amount < 0 else 0.0
+                currency_id = self.env['res.currency'].search(
+                    [('name', '=', currency)], limit=1).id
 
                 payment_move, linked_bills, partner = self.env['account.move.line']._find_matching_payment(
-                    date, amount)
+                    date, amount_currency, currency_id)
 
-                # Use payment's account if found, otherwise fallback to journal's default
-                if payment_move and payment_move.line_ids:
-                    payment_account = payment_move.line_ids[0].account_id
-                else:
-                    payment_account = self.journal_id.default_account_id
+                payment_account = self._get_payment_account(payment_move)
 
                 account = payment_account if payment_account else None
 
@@ -134,7 +132,7 @@ class AccountJournalCreditCardImportWizard(models.TransientModel):
                     raise UserError(
                         _("No account found from payment or journal."))
 
-                currency_code = normalized.get('currency') or 'EUR'
+                currency_code = currency or 'EUR'
                 # This will ensure a currency is given in case the field is empty
                 currency_id = self._check_currency_available(currency_code)
 
@@ -277,8 +275,13 @@ class AccountJournalCreditCardImportWizard(models.TransientModel):
             # If already ISO format or empty, pass it through (or handle as needed)
             return date_str
 
+    def _get_payment_account(self, payment_move):
+        """Return account from payment move or journal fallback."""
+        if payment_move and payment_move.line_ids:
+            return payment_move.line_ids[0].account_id
+        return self.journal_id.default_account_id
+
     def _add_balancing_line_if_needed(self, move_lines_vals, journal, ref, account):
-        """Ensure journal entry is balanced by adding a balancing line if required."""
         total_debit = sum(line[2]['debit'] for line in move_lines_vals)
         total_credit = sum(line[2]['credit'] for line in move_lines_vals)
         diff = round(total_debit - total_credit, 2)
@@ -286,9 +289,12 @@ class AccountJournalCreditCardImportWizard(models.TransientModel):
         if diff == 0.0:
             return move_lines_vals
 
+        # Check if foreign currency involved → delegate
+        # if self._has_foreign_currency(move_lines_vals):
+        #     return self._add_currency_diff_line(move_lines_vals, diff, journal, ref)
+
         debit = diff if diff < 0 else 0.0
         credit = diff if diff > 0 else 0.0
-
         balancing_line = {
             'name': f"{journal.name} - {ref} balancing line",
             'account_id': account.id,
@@ -299,8 +305,36 @@ class AccountJournalCreditCardImportWizard(models.TransientModel):
             'currency_id': self.env.company.currency_id.id,
             'amount_currency': -debit if debit else -credit,
         }
+        move_lines_vals.append((0, 0, balancing_line))
+        return move_lines_vals
 
-        _logger.info("Added balancing line: %s", balancing_line)
+    def _has_foreign_currency(self, move_lines_vals):
+        company_currency = self.env.company.currency_id.id
+        return any(
+            line[2].get(
+                'currency_id') and line[2]['currency_id'] != company_currency
+            for line in move_lines_vals
+        )
+
+    def _add_currency_diff_line(self, move_lines_vals, diff, journal, ref):
+        # TODO: Should it be read from journal settings instead?
+        if diff > 0:
+            balancing_account = self.env.company.income_currency_exchange_account_id
+        else:
+            balancing_account = self.env.company.expense_currency_exchange_account_id
+
+        debit = diff if diff < 0 else 0.0
+        credit = diff if diff > 0 else 0.0
+        balancing_line = {
+            'name': f"{journal.name} - {ref} FX difference",
+            'account_id': balancing_account.id,
+            'debit': debit,
+            'credit': credit,
+            'date': fields.Date.today(),
+            'date_maturity': fields.Date.today(),
+            'currency_id': self.env.company.currency_id.id,
+            'amount_currency': -debit if debit else -credit,
+        }
         move_lines_vals.append((0, 0, balancing_line))
         return move_lines_vals
 

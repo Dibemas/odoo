@@ -8,19 +8,18 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-def _build_payment_search_domain(amount, trx_date):
+def _build_payment_search_domain(amount, trx_date, currency_id, tolerance=0.05, days_tolerance=0):
     base_domain = [
         ('move_type', '=', 'entry'),
-        ('state', '=', 'posted'),
+        ('state', 'in', ['posted', 'in_progress']),
         ('journal_id.type', 'in', ['bank', 'cash']),
+        ('line_ids.currency_id', '=', currency_id),
+        ('line_ids.amount_currency', '>=', amount - tolerance),
+        ('line_ids.amount_currency', '<=', amount + tolerance),
+        ('date', '>=', trx_date - relativedelta(days=days_tolerance)),
+        ('date', '<=', trx_date + relativedelta(days=days_tolerance)),
     ]
-    amount_domain = [('line_ids.debit', '=', abs(amount))] if amount > 0 else [
-        ('line_ids.credit', '=', abs(amount))]
-    date_domain = [
-        ('date', '>=', trx_date),
-        ('date', '<=', trx_date),
-    ]
-    return base_domain + amount_domain + date_domain
+    return base_domain
 
 
 class AccountMoveLine(models.Model):
@@ -36,8 +35,8 @@ class AccountMoveLine(models.Model):
         'account.move',
         string="Linked Payment",
         domain="""
-            [('move_type', '=', 'entry'), 
-            ('journal_id.type', 'in', ['bank', 'cash']), 
+            [('move_type', '=', 'entry'),
+            ('journal_id.type', 'in', ['bank', 'cash']),
             ('state', '=', 'posted')]
         """
     )
@@ -57,19 +56,22 @@ class AccountMoveLine(models.Model):
                 line.linked_bill_id = bills[0].id if bills else False
                 line.partner_id = partner.id if partner else False
 
-    def _find_matching_payment(self, date, amount):
-        """Reusable payment match logic."""
+    def _find_matching_payment(self, date, amount, currency_id):
+        """Match payments by amount in currency and date, with ±2 day tolerance."""
         AccountMove = self.env['account.move']
-        trx_date = datetime.strptime(
-            date.strip(), '%Y-%m-%d').date() if isinstance(date, str) else date
 
-        domain = _build_payment_search_domain(amount, trx_date)
+        trx_date = fields.Date.from_string(
+            date) if isinstance(date, str) else date
+
+        # First attempt: exact date
+        domain = _build_payment_search_domain(
+            amount, trx_date, currency_id, days_tolerance=0)
         payments = AccountMove.search(domain, limit=1)
 
+        # Second attempt: ±2 days
         if not payments:
-            domain = _build_payment_search_domain(amount, trx_date)
-            domain[-1] = ('date', '<=', trx_date + relativedelta(days=2))
-            domain[-2] = ('date', '>=', trx_date - relativedelta(days=2))
+            domain = _build_payment_search_domain(
+                amount, trx_date, currency_id, days_tolerance=2)
             payments = AccountMove.search(domain, limit=1)
 
         if not payments:
@@ -84,22 +86,19 @@ class AccountMoveLine(models.Model):
         if not payment:
             return None, None
 
-        payable_lines = payment.line_ids.mapped('matched_debit_ids.debit_move_id.move_id') + \
-            payment.line_ids.mapped(
-                'matched_credit_ids.credit_move_id.move_id')
+        debit_moves = payment.line_ids.mapped(
+            'matched_debit_ids.debit_move_id.move_id')
+        credit_moves = payment.line_ids.mapped(
+            'matched_credit_ids.credit_move_id.move_id')
+        payable_moves = debit_moves | credit_moves
 
-        bills = payable_lines.filtered(
+        bills = payable_moves.filtered(
             lambda m: m.move_type == 'in_invoice' and m.payment_state != 'paid'
         )
 
         # If nothing found, try fetching via reconciled_bill_ids
         if not bills:
-            payment_rec = self.env['account.payment'].search(
-                [('move_id', 'in', payable_lines.move_id.ids)],
-                limit=1
-            )
-            bills = payment_rec.reconciled_bill_ids
-
+            bills = payment.origin_payment_id.reconciled_bill_ids
         partner = bills[0].partner_id if bills else payment.partner_id
         return bills, partner
 
