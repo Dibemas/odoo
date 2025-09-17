@@ -35,13 +35,13 @@
 
         <!-- Add Credit Card Menu and Action -->
         <record id="account_journal_action_add_credit_card_jornal" model="ir.actions.server">
-            <field name="name">Add Credit Card Jornal</field>
+            <field name="name">Add a Credit Card Jornal</field>
             <field name="model_id" ref="account.model_account_journal"/>
             <field name="state">code</field>
             <field name="code">action = model.action_add_credit_card_jornal()</field>
         </record>
 
-        <menuitem name="Add Credit Card" id="menu_action_online_add_credit_card_form" parent="account.account_banks_menu" action="account_journal_action_add_credit_card_jornal" groups="base.group_no_one" sequence="1"/>
+        <menuitem name="Add a Credit Card Journal" id="menu_action_online_add_credit_card_form" parent="account.account_banks_menu" action="account_journal_action_add_credit_card_jornal" groups="base.group_no_one" sequence="1"/>
 
     </data>
 </odoo>

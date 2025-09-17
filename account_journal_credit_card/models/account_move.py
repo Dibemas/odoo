@@ -18,7 +18,7 @@ class AccountMove(models.Model):
                             f"Set a value on the due date for the line {line.name}")
                     else:
                         payment, bills, partner = line._find_matching_payment(
-                            line.date_maturity, line.debit)
+                            line.date_maturity, line.amount_currency, line.currency_id.id)
                         if payment or bills or partner:
                             line_vals = {}
                             if payment:
