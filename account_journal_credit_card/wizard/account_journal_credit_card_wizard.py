@@ -122,7 +122,7 @@ class AccountJournalCreditCardImportWizard(models.TransientModel):
                     [('name', '=', currency)], limit=1).id
 
                 payment_move, linked_bills, partner = self.env['account.move.line']._find_matching_payment(
-                    date, amount_currency, currency_id)
+                    date, amount_currency, amount, currency_id)
 
                 payment_account = self._get_payment_account(payment_move)
 

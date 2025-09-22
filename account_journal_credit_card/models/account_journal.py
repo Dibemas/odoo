@@ -81,11 +81,12 @@ class AccountJournal(models.Model):
 
     @api.model_create_multi
     def create(self, vals):
-        journal = super().create(vals)
-        if journal.is_credit_card:
-            self.env['account.payment.term'].create_credit_card_payment_term(
-                journal)
-        return journal
+        journals = super().create(vals)
+        for journal in journals:
+            if journal.is_credit_card:
+                self.env['account.payment.term'].create_credit_card_payment_term(
+                    journal)
+        return journals
 
     def write(self, vals):
         res = super().write(vals)
