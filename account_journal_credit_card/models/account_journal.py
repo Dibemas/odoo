@@ -80,14 +80,12 @@ class AccountJournal(models.Model):
         return super().open_action()
 
     @api.model_create_multi
-    def create(self, vals_list):
-        journals = super().create(vals_list)
-        # If you want to skip side effects during module install/bootstrap, uncomment the guard:
-        # if self.env.context.get('install_mode') or self.env.context.get('module'):
-        #     return journals
+    def create(self, vals):
+        journals = super().create(vals)
         for journal in journals:
             if journal.is_credit_card:
-                self.env['account.payment.term'].create_credit_card_payment_term(journal)
+                self.env['account.payment.term'].create_credit_card_payment_term(
+                    journal)
         return journals
 
     def write(self, vals):

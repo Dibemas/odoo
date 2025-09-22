@@ -8,18 +8,62 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-def _build_payment_search_domain(amount, trx_date, currency_id, tolerance=0.05, days_tolerance=0):
-    base_domain = [
+def _build_payment_search_domain(amount_currency, trx_date, currency_id, days_tolerance=0):
+    """Find payments in the same currency, optionally with date tolerance."""
+    domain = [
         ('move_type', '=', 'entry'),
         ('state', 'in', ['posted', 'in_progress']),
         ('journal_id.type', 'in', ['bank', 'cash']),
         ('line_ids.currency_id', '=', currency_id),
-        ('line_ids.amount_currency', '>=', amount - tolerance),
-        ('line_ids.amount_currency', '<=', amount + tolerance),
-        ('date', '>=', trx_date - relativedelta(days=days_tolerance)),
-        ('date', '<=', trx_date + relativedelta(days=days_tolerance)),
+        ('line_ids.amount_currency', '>=', amount_currency),
+        ('line_ids.amount_currency', '<=', amount_currency),
     ]
-    return base_domain
+    if days_tolerance == 0:
+        domain.append(('date', '=', trx_date))
+    else:
+        domain.append(('date', '>=', trx_date -
+                      relativedelta(days=days_tolerance)))
+        domain.append(('date', '<=', trx_date +
+                      relativedelta(days=days_tolerance)))
+    return domain
+
+
+def _build_payment_search_domain_diff_currency(trx_date, currency_id, days_tolerance=0):
+    """Find payments in the other known currency with optional date tolerance."""
+    domain = [
+        ('move_type', '=', 'entry'),
+        ('state', 'in', ['posted', 'in_progress']),
+        ('journal_id.type', 'in', ['bank', 'cash']),
+        ('line_ids.currency_id', '=', currency_id),
+    ]
+    if days_tolerance == 0:
+        domain.append(('date', '=', trx_date))
+    else:
+        domain.append(('date', '>=', trx_date -
+                      relativedelta(days=days_tolerance)))
+        domain.append(('date', '<=', trx_date +
+                      relativedelta(days=days_tolerance)))
+    return domain
+
+
+def _build_payment_search_domain_amount(amount, trx_date, days_tolerance=0):
+    """Find payments filtered by amount, with optional date tolerance."""
+    domain = [
+        ('move_type', '=', 'entry'),
+        ('state', 'in', ['posted', 'in_progress']),
+        ('journal_id.type', 'in', ['bank', 'cash']),
+    ]
+    if days_tolerance == 0:
+        domain.append(('date', '=', trx_date))
+    else:
+        domain.append(('date', '>=', trx_date -
+                      relativedelta(days=days_tolerance)))
+        domain.append(('date', '<=', trx_date +
+                      relativedelta(days=days_tolerance)))
+    # Debit or credit condition
+    domain += [('line_ids.debit', '=', abs(amount))
+               ] if amount > 0 else [('line_ids.credit', '=', abs(amount))]
+    return domain
 
 
 class AccountMoveLine(models.Model):
@@ -56,23 +100,60 @@ class AccountMoveLine(models.Model):
                 line.linked_bill_id = bills[0].id if bills else False
                 line.partner_id = partner.id if partner else False
 
-    def _find_matching_payment(self, date, amount, currency_id):
+    def _find_matching_payment(self, date, amount_currency, amount, currency_id):
         """Match payments by amount in currency and date, with ±2 day tolerance."""
         AccountMove = self.env['account.move']
-
+        payments = None
+        company_currency = self.env.company.currency_id
+        currency = self.env['res.currency'].browse(currency_id)
         trx_date = fields.Date.from_string(
             date) if isinstance(date, str) else date
 
-        # First attempt: exact date
-        domain = _build_payment_search_domain(
-            amount, trx_date, currency_id, days_tolerance=0)
-        payments = AccountMove.search(domain, limit=1)
-
-        # Second attempt: ±2 days
-        if not payments:
+        # Step 1: Same currency using amount in currency
+        if company_currency == currency:
             domain = _build_payment_search_domain(
-                amount, trx_date, currency_id, days_tolerance=2)
+                amount_currency, trx_date, currency_id, days_tolerance=0)
             payments = AccountMove.search(domain, limit=1)
+            if not payments:
+                domain = _build_payment_search_domain(
+                    amount_currency, trx_date, currency_id, days_tolerance=2)
+                payments = AccountMove.search(domain, limit=1)
+
+        # Step 2: Cross-currency conversion using amount
+        if company_currency != currency:
+            domain = _build_payment_search_domain_amount(
+                amount, trx_date, days_tolerance=0)
+            payments = AccountMove.search(domain, limit=1)
+            if not payments:
+                domain = _build_payment_search_domain_amount(
+                    amount, trx_date, days_tolerance=2)
+                payments = AccountMove.search(domain, limit=1)
+
+        # Step 3: Cross-currency conversion using amount in currency
+        if not payments:
+            other_currency = company_currency if currency != company_currency else None
+            if other_currency:
+                domain = _build_payment_search_domain_diff_currency(
+                    trx_date, other_currency.id, days_tolerance=0)
+                candidate_payments = AccountMove.search(domain, limit=1)
+                for payment in candidate_payments:
+                    converted = payment.currency_id._convert(
+                        abs(payment.amount_total), currency, payment.company_id, trx_date
+                    )
+                    if abs(converted - abs(amount_currency)) <= max(0.5, abs(amount_currency) * 0.005):
+                        payments = payment
+                        break
+                if not payments:
+                    domain = _build_payment_search_domain_diff_currency(
+                        trx_date, other_currency.id, days_tolerance=2)
+                    candidate_payments = AccountMove.search(domain, limit=10)
+                    for payment in candidate_payments:
+                        converted = payment.currency_id._convert(
+                            abs(payment.amount_total), currency, payment.company_id, trx_date
+                        )
+                        if abs(converted - abs(amount_currency)) <= max(0.5, abs(amount_currency) * 0.005):
+                            payments = payment
+                            break
 
         if not payments:
             return None, None, None
