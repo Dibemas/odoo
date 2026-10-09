@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Comma-separated email domains allowed to auto-link. Emptying this
+        disables the domain check entirely, which is only sensible if the Entra
+        app registration is single-tenant. Keeping it set is cheap insurance.
+    -->
+    <data noupdate="1">
+        <record id="param_autolink_domains" model="ir.config_parameter">
+            <field name="key">auth_oauth_autolink.allowed_domains</field>
+            <field name="value">dibemas.be</field>
+        </record>
+
+        <!--
+            Skip Odoo's own second factor after a Microsoft login, since Entra
+            already enforced MFA. Set to 0 to hand the second step back to Odoo
+            for SSO users; password logins are never affected either way.
+        -->
+        <record id="param_autolink_skip_mfa" model="ir.config_parameter">
+            <field name="key">auth_oauth_autolink.skip_mfa</field>
+            <field name="value">1</field>
+        </record>
+    </data>
+</odoo>

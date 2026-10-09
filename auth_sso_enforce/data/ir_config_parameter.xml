@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Enforcement ships disabled on purpose.
+
+        Installing or upgrading this module must never change authentication
+        behaviour by itself: the rollout is (1) install, (2) set the bypass flag
+        on the break-glass admin and the accountant, (3) confirm Microsoft SSO
+        actually works, and only then (4) set this to 1.
+
+        noupdate="1" so that a later module upgrade cannot silently re-enable
+        or re-disable enforcement behind your back.
+    -->
+    <data noupdate="1">
+        <record id="param_sso_enforce_active" model="ir.config_parameter">
+            <field name="key">custom_auth_sso_enforce.active</field>
+            <field name="value">0</field>
+        </record>
+    </data>
+</odoo>
