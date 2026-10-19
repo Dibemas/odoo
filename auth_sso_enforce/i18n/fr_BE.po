@@ -1,0 +1,33 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* auth_sso_enforce
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: fr_BE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: auth_sso_enforce
+#: model:ir.model.fields,field_description:auth_sso_enforce.field_res_users__bypass_sso_enforcement
+msgid "Allow Local Password Login (Bypass SSO)"
+msgstr "Autoriser la connexion par mot de passe local (contourner le SSO)"
+
+#. module: auth_sso_enforce
+#. odoo-python
+#: code:addons/auth_sso_enforce/models/res_users.py:0
+msgid ""
+"Single Sign-On (SSO) is enforced for your account. Please log in using the "
+"'Log in with Microsoft' button."
+msgstr "L'authentification unique (SSO) est obligatoire pour votre compte. Veuillez vous connecter via le bouton « Se connecter avec Microsoft »."
+
+#. module: auth_sso_enforce
+#: model_terms:ir.ui.view,arch_db:auth_sso_enforce.view_users_form_sso_enforce
+msgid "Authentication"
+msgstr "Authentification"
