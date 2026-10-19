@@ -13,7 +13,7 @@
     -->
     <data noupdate="1">
         <record id="param_sso_enforce_active" model="ir.config_parameter">
-            <field name="key">custom_auth_sso_enforce.active</field>
+            <field name="key">auth_sso_enforce.active</field>
             <field name="value">0</field>
         </record>
     </data>
