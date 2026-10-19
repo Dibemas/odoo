@@ -1,0 +1,128 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* account_supplier_payment_method
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0\n"
+"Report-Msgid-Bugs-To: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,field_description:account_supplier_payment_method.field_account_supplier_payment_method__active
+msgid "Active"
+msgstr "Actif"
+
+#. module: account_supplier_payment_method
+#: model_terms:ir.ui.view,arch_db:account_supplier_payment_method.account_supplier_payment_method_view_search
+msgid "Archived"
+msgstr "Archivé"
+
+#. module: account_supplier_payment_method
+#: model:account.supplier.payment.method,name:account_supplier_payment_method.payment_method_bank_transfer
+msgid "Bank transfer"
+msgstr "Virement bancaire"
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,help:account_supplier_payment_method.field_account_supplier_payment_method__include_in_payment_run
+msgid "Bills with this payment method can be paid through a bank payment file. Leave it off for methods that are paid outside the payment run, such as credit card or direct debit."
+msgstr "Les factures avec ce mode de paiement peuvent être payées via un fichier de paiement bancaire. Laissez cette option désactivée pour les modes payés en dehors du lot de paiements, comme la carte de crédit ou le prélèvement automatique."
+
+#. module: account_supplier_payment_method
+#: model_terms:ir.actions.act_window,help:account_supplier_payment_method.action_account_supplier_payment_method
+msgid "Create a supplier payment method"
+msgstr "Créer un mode de paiement fournisseur"
+
+#. module: account_supplier_payment_method
+#: model:account.supplier.payment.method,name:account_supplier_payment_method.payment_method_credit_card
+msgid "Credit Card"
+msgstr "Carte de crédit"
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,field_description:account_supplier_payment_method.field_res_partner__property_supplier_payment_method_id
+#: model:ir.model.fields,field_description:account_supplier_payment_method.field_res_users__property_supplier_payment_method_id
+msgid "Default Payment Method"
+msgstr "Mode de paiement par défaut"
+
+#. module: account_supplier_payment_method
+#: model:account.supplier.payment.method,name:account_supplier_payment_method.payment_method_direct_debit
+msgid "Direct Debit"
+msgstr "Prélèvement automatique"
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,help:account_supplier_payment_method.field_account_bank_statement_line__supplier_payment_method_id
+#: model:ir.model.fields,help:account_supplier_payment_method.field_account_move__supplier_payment_method_id
+msgid "How this bill is paid. Defaults to the supplier's Default Payment Method."
+msgstr "Mode de paiement de cette facture. Par défaut, le mode de paiement par défaut du fournisseur."
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,field_description:account_supplier_payment_method.field_account_supplier_payment_method__include_in_payment_run
+msgid "Include in Payment Run"
+msgstr "Inclure dans le lot de paiements"
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,field_description:account_supplier_payment_method.field_account_supplier_payment_method__name
+msgid "Name"
+msgstr "Nom"
+
+#. module: account_supplier_payment_method
+#: model_terms:ir.ui.view,arch_db:account_supplier_payment_method.view_account_invoice_filter_supplier_payment_method
+msgid "Open, Not Ready for Payment"
+msgstr "Ouvert, pas prêt pour paiement"
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,field_description:account_supplier_payment_method.field_account_bank_statement_line__supplier_payment_method_id
+#: model:ir.model.fields,field_description:account_supplier_payment_method.field_account_move__supplier_payment_method_id
+msgid "Payment Method"
+msgstr "Mode de paiement"
+
+#. module: account_supplier_payment_method
+#: model_terms:ir.actions.act_window,help:account_supplier_payment_method.action_account_supplier_payment_method
+msgid "Payment methods describe how a supplier is paid, such as by bank transfer or by direct debit."
+msgstr "Les modes de paiement décrivent comment un fournisseur est payé, par exemple par virement bancaire ou par prélèvement automatique."
+
+#. module: account_supplier_payment_method
+#: model:account.supplier.payment.method,name:account_supplier_payment_method.payment_method_prepayment
+msgid "Prepayment"
+msgstr "Paiement anticipé"
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,help:account_supplier_payment_method.field_res_partner__property_supplier_payment_method_id
+#: model:ir.model.fields,help:account_supplier_payment_method.field_res_users__property_supplier_payment_method_id
+msgid "Proposed as the payment method on new vendor bills from this supplier."
+msgstr "Proposé comme mode de paiement sur les nouvelles factures de ce fournisseur."
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,field_description:account_supplier_payment_method.field_account_bank_statement_line__is_ready_for_payment
+#: model:ir.model.fields,field_description:account_supplier_payment_method.field_account_move__is_ready_for_payment
+#: model_terms:ir.ui.view,arch_db:account_supplier_payment_method.view_account_invoice_filter_supplier_payment_method
+msgid "Ready for Payment"
+msgstr "Prêt pour paiement"
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,field_description:account_supplier_payment_method.field_account_supplier_payment_method__sequence
+msgid "Sequence"
+msgstr "Séquence"
+
+#. module: account_supplier_payment_method
+#: model:ir.model,name:account_supplier_payment_method.model_account_supplier_payment_method
+#: model_terms:ir.ui.view,arch_db:account_supplier_payment_method.view_account_invoice_filter_supplier_payment_method
+msgid "Supplier Payment Method"
+msgstr "Mode de paiement fournisseur"
+
+#. module: account_supplier_payment_method
+#: model:ir.actions.act_window,name:account_supplier_payment_method.action_account_supplier_payment_method
+#: model:ir.ui.menu,name:account_supplier_payment_method.menu_account_supplier_payment_method
+#: model_terms:ir.ui.view,arch_db:account_supplier_payment_method.account_supplier_payment_method_view_list
+msgid "Supplier Payment Methods"
+msgstr "Modes de paiement fournisseurs"
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,help:account_supplier_payment_method.field_account_bank_statement_line__is_ready_for_payment
+#: model:ir.model.fields,help:account_supplier_payment_method.field_account_move__is_ready_for_payment
+msgid "The bill is posted, has an amount left to pay and no payment in progress, is not blocked, has a trusted bank account, a supplier with a country, and a payment method that is empty or included in the payment run."
+msgstr "La facture est comptabilisée, a un montant restant à payer sans paiement en cours, n'est pas bloquée, et a un compte bancaire de confiance, un fournisseur avec un pays, et un mode de paiement vide ou inclus dans le lot de paiements."

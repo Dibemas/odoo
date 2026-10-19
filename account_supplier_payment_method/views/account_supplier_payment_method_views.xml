@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="account_supplier_payment_method_view_list" model="ir.ui.view">
+        <field name="name">account.supplier.payment.method.list</field>
+        <field name="model">account.supplier.payment.method</field>
+        <field name="arch" type="xml">
+            <list string="Supplier Payment Methods" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="include_in_payment_run"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="account_supplier_payment_method_view_search" model="ir.ui.view">
+        <field name="name">account.supplier.payment.method.search</field>
+        <field name="model">account.supplier.payment.method</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_account_supplier_payment_method" model="ir.actions.act_window">
+        <field name="name">Supplier Payment Methods</field>
+        <field name="res_model">account.supplier.payment.method</field>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="account_supplier_payment_method_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create a supplier payment method</p>
+            <p>Payment methods describe how a supplier is paid, such as by bank transfer or by direct debit.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_account_supplier_payment_method"
+              action="action_account_supplier_payment_method"
+              parent="account.account_invoicing_menu"
+              groups="account.group_account_manager"
+              sequence="2"/>
+</odoo>
