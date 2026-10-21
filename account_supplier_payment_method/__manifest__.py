@@ -34,7 +34,7 @@ This list is unrelated to Odoo's own technical payment methods
 (``account.payment.method.line``: Manual, SEPA Credit Transfer, ...), which
 decide how a payment is executed from a journal.
     """,
-    'author': 'Shield',
+    'author': 'Johan Camp',
     'license': 'LGPL-3',
     'depends': [
         'account',
