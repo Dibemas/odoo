@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_move_form_supplier_payment_method" model="ir.ui.view">
+        <field name="name">account.move.form.supplier.payment.method</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <!-- The header has one partner_bank_id; the 'Other Info' tab has two more. -->
+            <xpath expr="//group[@id='header_right_group']/field[@name='partner_bank_id']" position="after">
+                <field name="supplier_payment_method_id"
+                       options="{'no_create': True, 'no_open': True}"
+                       invisible="move_type not in ('in_invoice', 'in_refund', 'in_receipt')"/>
+                <field name="is_ready_for_payment"
+                       invisible="move_type not in ('in_invoice', 'in_receipt') or state != 'posted'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_in_invoice_tree_supplier_payment_method" model="ir.ui.view">
+        <field name="name">account.move.in.list.supplier.payment.method</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_in_invoice_tree"/>
+        <field name="arch" type="xml">
+            <field name="invoice_date_due" position="after">
+                <field name="supplier_payment_method_id" optional="show"/>
+                <field name="is_ready_for_payment" optional="show"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_account_invoice_filter_supplier_payment_method" model="ir.ui.view">
+        <field name="name">account.move.search.supplier.payment.method</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_bill_filter"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="supplier_payment_method_id"/>
+            </field>
+            <filter name="due_date" position="after">
+                <separator/>
+                <filter string="Ready for Payment"
+                        name="ready_for_payment"
+                        domain="[('is_ready_for_payment', '=', True)]"/>
+                <filter string="Open, Not Ready for Payment"
+                        name="not_ready_for_payment"
+                        domain="[('is_ready_for_payment', '=', False), ('move_type', 'in', ('in_invoice', 'in_receipt')), ('state', '=', 'posted'), ('amount_residual', '>', 0), ('payment_state', 'not in', ('in_payment', 'paid', 'reversed'))]"/>
+            </filter>
+            <filter name="preferred_payment_method_line" position="after">
+                <filter string="Ready for Payment"
+                        name="group_by_ready_for_payment"
+                        context="{'group_by': 'is_ready_for_payment'}"/>
+                <filter string="Supplier Payment Method"
+                        name="group_by_supplier_payment_method"
+                        context="{'group_by': 'supplier_payment_method_id'}"/>
+            </filter>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,128 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* account_supplier_payment_method
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0\n"
+"Report-Msgid-Bugs-To: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,field_description:account_supplier_payment_method.field_account_supplier_payment_method__active
+msgid "Active"
+msgstr "Aktiv"
+
+#. module: account_supplier_payment_method
+#: model_terms:ir.ui.view,arch_db:account_supplier_payment_method.account_supplier_payment_method_view_search
+msgid "Archived"
+msgstr "Archiviert"
+
+#. module: account_supplier_payment_method
+#: model:account.supplier.payment.method,name:account_supplier_payment_method.payment_method_bank_transfer
+msgid "Bank transfer"
+msgstr "Banküberweisung"
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,help:account_supplier_payment_method.field_account_supplier_payment_method__include_in_payment_run
+msgid "Bills with this payment method can be paid through a bank payment file. Leave it off for methods that are paid outside the payment run, such as credit card or direct debit."
+msgstr "Rechnungen mit dieser Zahlungsmethode können über eine Zahlungsdatei an die Bank bezahlt werden. Lassen Sie dies für Methoden aus, die außerhalb des Zahlungslaufs bezahlt werden, z. B. Kreditkarte oder Lastschrift."
+
+#. module: account_supplier_payment_method
+#: model_terms:ir.actions.act_window,help:account_supplier_payment_method.action_account_supplier_payment_method
+msgid "Create a supplier payment method"
+msgstr "Zahlungsmethode für Lieferanten anlegen"
+
+#. module: account_supplier_payment_method
+#: model:account.supplier.payment.method,name:account_supplier_payment_method.payment_method_credit_card
+msgid "Credit Card"
+msgstr "Kreditkarte"
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,field_description:account_supplier_payment_method.field_res_partner__property_supplier_payment_method_id
+#: model:ir.model.fields,field_description:account_supplier_payment_method.field_res_users__property_supplier_payment_method_id
+msgid "Default Payment Method"
+msgstr "Standard-Zahlungsmethode"
+
+#. module: account_supplier_payment_method
+#: model:account.supplier.payment.method,name:account_supplier_payment_method.payment_method_direct_debit
+msgid "Direct Debit"
+msgstr "Lastschrift"
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,help:account_supplier_payment_method.field_account_bank_statement_line__supplier_payment_method_id
+#: model:ir.model.fields,help:account_supplier_payment_method.field_account_move__supplier_payment_method_id
+msgid "How this bill is paid. Defaults to the supplier's Default Payment Method."
+msgstr "Wie diese Rechnung bezahlt wird. Standardmäßig die Standard-Zahlungsmethode des Lieferanten."
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,field_description:account_supplier_payment_method.field_account_supplier_payment_method__include_in_payment_run
+msgid "Include in Payment Run"
+msgstr "In Zahlungslauf aufnehmen"
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,field_description:account_supplier_payment_method.field_account_supplier_payment_method__name
+msgid "Name"
+msgstr "Name"
+
+#. module: account_supplier_payment_method
+#: model_terms:ir.ui.view,arch_db:account_supplier_payment_method.view_account_invoice_filter_supplier_payment_method
+msgid "Open, Not Ready for Payment"
+msgstr "Offen, nicht zahlungsbereit"
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,field_description:account_supplier_payment_method.field_account_bank_statement_line__supplier_payment_method_id
+#: model:ir.model.fields,field_description:account_supplier_payment_method.field_account_move__supplier_payment_method_id
+msgid "Payment Method"
+msgstr "Zahlungsmethode"
+
+#. module: account_supplier_payment_method
+#: model_terms:ir.actions.act_window,help:account_supplier_payment_method.action_account_supplier_payment_method
+msgid "Payment methods describe how a supplier is paid, such as by bank transfer or by direct debit."
+msgstr "Zahlungsmethoden beschreiben, wie ein Lieferant bezahlt wird, zum Beispiel per Banküberweisung oder Lastschrift."
+
+#. module: account_supplier_payment_method
+#: model:account.supplier.payment.method,name:account_supplier_payment_method.payment_method_prepayment
+msgid "Prepayment"
+msgstr "Vorauszahlung"
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,help:account_supplier_payment_method.field_res_partner__property_supplier_payment_method_id
+#: model:ir.model.fields,help:account_supplier_payment_method.field_res_users__property_supplier_payment_method_id
+msgid "Proposed as the payment method on new vendor bills from this supplier."
+msgstr "Wird als Zahlungsmethode für neue Eingangsrechnungen dieses Lieferanten vorgeschlagen."
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,field_description:account_supplier_payment_method.field_account_bank_statement_line__is_ready_for_payment
+#: model:ir.model.fields,field_description:account_supplier_payment_method.field_account_move__is_ready_for_payment
+#: model_terms:ir.ui.view,arch_db:account_supplier_payment_method.view_account_invoice_filter_supplier_payment_method
+msgid "Ready for Payment"
+msgstr "Zahlungsbereit"
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,field_description:account_supplier_payment_method.field_account_supplier_payment_method__sequence
+msgid "Sequence"
+msgstr "Reihenfolge"
+
+#. module: account_supplier_payment_method
+#: model:ir.model,name:account_supplier_payment_method.model_account_supplier_payment_method
+#: model_terms:ir.ui.view,arch_db:account_supplier_payment_method.view_account_invoice_filter_supplier_payment_method
+msgid "Supplier Payment Method"
+msgstr "Zahlungsmethode Lieferant"
+
+#. module: account_supplier_payment_method
+#: model:ir.actions.act_window,name:account_supplier_payment_method.action_account_supplier_payment_method
+#: model:ir.ui.menu,name:account_supplier_payment_method.menu_account_supplier_payment_method
+#: model_terms:ir.ui.view,arch_db:account_supplier_payment_method.account_supplier_payment_method_view_list
+msgid "Supplier Payment Methods"
+msgstr "Zahlungsmethoden Lieferanten"
+
+#. module: account_supplier_payment_method
+#: model:ir.model.fields,help:account_supplier_payment_method.field_account_bank_statement_line__is_ready_for_payment
+#: model:ir.model.fields,help:account_supplier_payment_method.field_account_move__is_ready_for_payment
+msgid "The bill is posted, has an amount left to pay and no payment in progress, is not blocked, has a trusted bank account, a supplier with a country, and a payment method that is empty or included in the payment run."
+msgstr "Die Rechnung ist gebucht, hat einen offenen Betrag ohne laufende Zahlung, ist nicht gesperrt und hat ein vertrauenswürdiges Bankkonto, einen Lieferanten mit Land und eine Zahlungsmethode, die leer ist oder in den Zahlungslauf aufgenommen wird."

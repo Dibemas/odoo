@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="payment_method_prepayment" model="account.supplier.payment.method">
+        <field name="name">Prepayment</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="payment_method_bank_transfer" model="account.supplier.payment.method">
+        <field name="name">Bank transfer</field>
+        <field name="sequence">20</field>
+        <field name="include_in_payment_run" eval="True"/>
+    </record>
+    <record id="payment_method_credit_card" model="account.supplier.payment.method">
+        <field name="name">Credit Card</field>
+        <field name="sequence">30</field>
+    </record>
+    <record id="payment_method_direct_debit" model="account.supplier.payment.method">
+        <field name="name">Direct Debit</field>
+        <field name="sequence">40</field>
+    </record>
+</odoo>
