@@ -43,6 +43,14 @@ How odoo.sh differs from Shield's level27 servers:
   Microsoft login therefore does not work on staging until you re-enable the
   provider there. Keep `auth_sso_enforce.active` at `0` on staging, or nobody
   without a bypass can log in.
+- **Push one branch at a time.** On 2026-10-25, `stag` and `prod` were pushed
+  seconds apart. The staging build succeeded, and the production build failed
+  with "Failed to clone the repository" (the repository is 4.5 GB, with full
+  Odoo history). Push `stag`, wait for its build, then push `prod`.
+- **A failed production build cannot be rebuilt from the menu.** Only a new
+  commit starts one: `git commit --allow-empty -m "Trigger odoo.sh production
+  build"` on `prod`, then push. The previous production build keeps running
+  meanwhile.
 - **Recovery** goes through the odoo.sh web shell (`psql`, `odoo-bin shell`)
   rather than SSH.
 
@@ -56,6 +64,7 @@ How odoo.sh differs from Shield's level27 servers:
 | [`auth_sso_enforce`](#microsoft-sso-auth_sso_enforce--auth_oauth_autolink) | 18.0.1.0.0 | Johan Camp / LGPL-3 | Installed, **not enforced** (`auth_sso_enforce.active` = `0`) |
 | [`auth_oauth_autolink`](#microsoft-sso-auth_sso_enforce--auth_oauth_autolink) | **18.0.1.2.0** | Johan Camp / LGPL-3 | Installed. Microsoft login works on production. 1.2.0 (Shield's stale-tab fix) merged into `prod` on 2026-10-25; the build upgrades it |
 | [`journal_entries_deleter`](#journal_entries_deleter) | 1.0 | Marco Silva, Johan Camp / LGPL-3 | **One-off** clean-up tool. Uninstall when finished |
+| [`llm_tool_accounting`](#llm_tool_accounting) | 18.0.1.0.0 | Johan Camp / LGPL-3 | **New, on `stag`, uncommitted.** Company lock, accounting guards and bank reconciliation for the MCP tools |
 | [`llm`](llm/README.md) | 18.0.1.7.2 | Apexive / LGPL-3 | Merged into `prod` on 2026-10-25. Install via Apps |
 | [`llm_tool`](llm_tool/README.md) | 18.0.4.1.2 | Apexive / LGPL-3 | Merged into `prod` on 2026-10-25. Install via Apps |
 | [`llm_mcp_server`](llm_mcp_server/README.md) | 18.0.1.3.3 | Apexive, patched / LGPL-3 | Merged into `prod` on 2026-10-25. Install via Apps |
@@ -250,6 +259,34 @@ Things to know from the Shield rollout (details in
   the server.
 - If SSO enforcement is switched on, an SSO user still needs a local password
   to create an API key, because creating a key asks for the password again.
+
+### `llm_tool_accounting`
+
+Written in-house on 2026-10-25 for the accounting assistant (Claude Desktop skill `odoo-boekhouding`,
+kept in `~/Claude/skills/`). The Apexive tools take no context, so without it Odoo makes all four
+companies visible and fills defaults and per-company fields (account codes, partner accounts) from the
+user's main company. The module fixes that inside Odoo:
+
+- **Company lock.** `accounting_select_company` stores a session company on the user
+  (`llm_company_id`); every following tool call runs with `allowed_company_ids = [that company]`.
+  Without a session company, calls on `account.*` models are refused
+  (`llm_tool_accounting.require_company`, default `1`).
+- **Guards.** Customer invoices/credit notes are never posted or sent through the tools; no direct
+  `state`/`auto_post` writes; no deletes, ORM `create`/`write` or private methods on `account.*` via the
+  method executor; in a company whose *VAT Regime* is not "VAT registered" nothing carrying VAT can be
+  posted; in a company with *Analytic Required on Income and Expenses* every class 6/7 line needs a
+  complete analytic distribution.
+- **Bank reconciliation.** `accounting_reconcile_statement_line` reconciles one statement line with
+  open items and/or a counterpart account (label, partner, taxes, analytic distribution), using the
+  reconciliation widget's own logic inside a savepoint.
+- Two fields on the company form: **VAT Regime** and **Analytic Required on Income and Expenses**.
+
+Tests: 18 in `llm_tool_accounting/tests/`, all passing on a local Odoo 18 Enterprise database
+(2026-10-25). Apexive's own `llm_tool` tests have 9 errors with or without this module (an upstream
+test bug: they assign `_tool_registry` on a recordset).
+
+After installing on production, set on the company form: Jazz and NORB → *Not VAT registered*,
+Camp Dirk → *VAT franchise (art. 56bis)*, NORB → *Analytic Required*. Dibemas keeps the defaults.
 
 ### Getting it to production
 
