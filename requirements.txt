@@ -1,0 +1,5 @@
+# External Python dependencies for the Apexive LLM/MCP modules (llm_tool, llm_mcp_server).
+# Versions match what runs on Shield VZW, where this stack is proven.
+mcp==1.29.0
+pydantic==2.13.4
+packaging
