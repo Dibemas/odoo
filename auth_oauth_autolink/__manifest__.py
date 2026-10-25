@@ -1,6 +1,6 @@
 {
     'name': 'Microsoft SSO - automatic user linking and single second factor',
-    'version': '18.0.1.0.0',
+    'version': '18.0.1.2.0',
     'category': 'Tools',
     'summary': 'Link an existing Odoo user to their Microsoft account on first SSO login, and let Entra be the only second factor',
     'description': """
@@ -58,14 +58,34 @@ modified - nobody's TOTP secret is deleted, it simply is not asked for.
   the step would mail the user on every login.
 * Kill switch: ``auth_oauth_autolink.skip_mfa``, shipped as ``1``. Set it
   to ``0`` to hand the second step back to Odoo for SSO users too.
+
+No stale tabs
+=============
+
+The web client page embeds per-session state - the subscription expiry and the
+upload CSRF token - and Odoo serves it without cache headers. Chrome's
+*Duplicate tab* and back/forward therefore restore an old copy: a long-resolved
+"database expired" banner, and uploads failing with "Session expired (invalid
+CSRF token)".
+
+* Every backend page (one route: ``/odoo``, ``/odoo/...``, ``/web``) is sent with
+  ``Cache-Control: no-store``, so a duplicate always loads fresh.
+* A tab left open across a new login keeps a token for the old session. It now
+  fetches the current token from ``/auth_oauth_autolink/session/csrf_token``
+  whenever it becomes active again, so uploads keep working without a reload.
     """,
     'author': 'Johan Camp',
     'license': 'LGPL-3',
     # auth_totp is a hard dependency for load order, not just for the feature:
     # its _should_alert_new_device returns without calling super(), so this
     # module has to be loaded after it to sit ahead of it in the MRO.
-    'depends': ['auth_oauth', 'auth_totp'],
+    'depends': ['auth_oauth', 'auth_totp', 'web'],
     'data': ['data/ir_config_parameter.xml'],
+    'assets': {
+        'web.assets_backend': [
+            'auth_oauth_autolink/static/src/js/csrf_refresh.js',
+        ],
+    },
     'installable': True,
     'application': False,
 }
