@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        1 = tool calls on accounting models are refused until a session company
+        is chosen with accounting_select_company. Set to 0 to allow
+        cross-company reading again (the other guards stay active).
+    -->
+    <data noupdate="1">
+        <record id="param_require_company" model="ir.config_parameter">
+            <field name="key">llm_tool_accounting.require_company</field>
+            <field name="value">1</field>
+        </record>
+    </data>
+</odoo>
