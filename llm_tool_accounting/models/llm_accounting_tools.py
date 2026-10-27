@@ -70,6 +70,10 @@ class LLMAccountingTools(models.AbstractModel):
     def _llm_accounting_company_info(self):
         company = self.env.company
         journals = self.env['account.journal'].search([('company_id', '=', company.id)])
+        # sudo: a journal's bank account may belong to another company (set up
+        # from the wrong company); under the lock reading it would raise.
+        foreign_bank_accounts = journals.bank_account_id.sudo().filtered(
+            lambda b: b.company_id and b.company_id != company)
         return {
             'session_company': {'id': company.id, 'name': company.name},
             'vat_regime': company.llm_vat_regime,
@@ -97,9 +101,15 @@ class LLMAccountingTools(models.AbstractModel):
                     'name': j.name,
                     'type': j.type,
                     'default_account': j.default_account_id.display_name or None,
-                    'bank_account': j.bank_account_id.display_name or None,
+                    'bank_account': j.bank_account_id.sudo().display_name or None,
                 }
                 for j in journals
+            ],
+            'warnings': [
+                _("Bank account %(account)s of journal %(journal)s belongs to %(other)s, not to %(company)s.",
+                  account=bank.display_name, journal=", ".join(journals.filtered(lambda j: j.bank_account_id == bank).mapped('code')),
+                  other=bank.company_id.name, company=company.name)
+                for bank in foreign_bank_accounts
             ],
         }
 

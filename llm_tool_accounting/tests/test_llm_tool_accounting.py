@@ -65,6 +65,26 @@ class TestLLMToolAccounting(TestBankRecWidgetCommon):
         self.assertTrue(info['journals'])
         self.assertEqual(self.user.llm_company_id, self.company_b)
 
+    def test_select_company_with_foreign_bank_account(self):
+        # A bank journal of company B whose bank account is stored under company A
+        # (inconsistent data, as found in production).
+        bank_account = self.env['res.partner.bank'].create({
+            'acc_number': 'BE61733076948817',
+            'partner_id': self.company_b.partner_id.id,
+        })
+        journal = self.company_data_b['default_journal_bank']
+        journal.bank_account_id = bank_account
+        self.env.flush_all()
+        self.env.cr.execute("UPDATE res_partner_bank SET company_id = %s WHERE id = %s",
+                            (self.company_a.id, bank_account.id))
+        self.env.invalidate_all()
+        info = self._select(self.company_b)
+        bank_journal = next(j for j in info['journals'] if j['id'] == journal.id)
+        self.assertEqual(bank_journal['bank_account'], bank_account.display_name)
+        self.assertEqual(len(info['warnings']), 1)
+        self.assertIn(self.company_a.name, info['warnings'][0])
+        self.assertEqual(self._run(self._tool('accounting_session_info'))['warnings'], info['warnings'])
+
     def test_reads_are_limited_to_session_company(self):
         self._select(self.company_a)
         moves = self._run(self.retriever, model='account.move', domain=[], fields=['company_id'], limit=1000)
