@@ -64,7 +64,7 @@ How odoo.sh differs from Shield's level27 servers:
 | [`auth_sso_enforce`](#microsoft-sso-auth_sso_enforce--auth_oauth_autolink) | 18.0.1.0.0 | Johan Camp / LGPL-3 | Installed, **not enforced** (`auth_sso_enforce.active` = `0`) |
 | [`auth_oauth_autolink`](#microsoft-sso-auth_sso_enforce--auth_oauth_autolink) | **18.0.1.2.0** | Johan Camp / LGPL-3 | Installed. Microsoft login works on production. 1.2.0 (Shield's stale-tab fix) merged into `prod` on 2026-10-25; the build upgrades it |
 | [`journal_entries_deleter`](#journal_entries_deleter) | 1.0 | Marco Silva, Johan Camp / LGPL-3 | **One-off** clean-up tool. Uninstall when finished |
-| [`llm_tool_accounting`](#llm_tool_accounting) | 18.0.1.0.0 | Johan Camp / LGPL-3 | **New, on `stag`, uncommitted.** Company lock, accounting guards and bank reconciliation for the MCP tools |
+| [`llm_tool_accounting`](#llm_tool_accounting) | 18.0.1.0.1 | Johan Camp / LGPL-3 | On `prod`; 18.0.1.0.1 uncommitted on `stag`. Company lock, accounting guards and bank reconciliation for the MCP tools |
 | [`llm`](llm/README.md) | 18.0.1.7.2 | Apexive / LGPL-3 | Merged into `prod` on 2026-10-25. Install via Apps |
 | [`llm_tool`](llm_tool/README.md) | 18.0.4.1.2 | Apexive / LGPL-3 | Merged into `prod` on 2026-10-25. Install via Apps |
 | [`llm_mcp_server`](llm_mcp_server/README.md) | 18.0.1.3.3 | Apexive, patched / LGPL-3 | Merged into `prod` on 2026-10-25. Install via Apps |
@@ -281,7 +281,7 @@ user's main company. The module fixes that inside Odoo:
   reconciliation widget's own logic inside a savepoint.
 - Two fields on the company form: **VAT Regime** and **Analytic Required on Income and Expenses**.
 
-Tests: 18 in `llm_tool_accounting/tests/`, all passing on a local Odoo 18 Enterprise database
+Tests: 19 in `llm_tool_accounting/tests/`, all passing on a local Odoo 18 Enterprise database
 (2026-10-25). Apexive's own `llm_tool` tests have 9 errors with or without this module (an upstream
 test bug: they assign `_tool_registry` on a recordset).
 
